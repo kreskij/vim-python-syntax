@@ -20,23 +20,22 @@ let s:python36 = 1
 
 if exists('b:python_py3_compat')
   " if b:python_py3_compat isn't a string, default to 3.6
-  if type(b:python_py3_compat) == type("")
+  if type(b:python_py3_compat) == type('')
     let s:py3 = b:python_py3_compat
   elseif b:python_py3_compat
     let s:py3 = '3.6'
   else
     let s:py3 = ''
   endif
-  
 
   " if the buffer var is a string containing a python version, enable
   " everything up to that version
-  if s:py3 == '3.5'
+  if s:py3 ==? '3.5'
     let s:python36 = 0
-  elseif s:py3 == '3.4'
+  elseif s:py3 ==? '3.4'
     let s:python36 = 0
     let s:python35 = 0
-  elseif s:py3 != '3.6'
+  elseif s:py3 !=? '3.6'
     let s:python36 = 0
     let s:python35 = 0
     let s:python34 = 0
@@ -183,7 +182,7 @@ hi! link pyCloseParenError Error
 
 syn cluster pyClOperators add=pyAssign
 syn match pyAssign /==\@!/ nextgroup=@pyExpr skipwhite skipnl skipempty
-syn match pyAssign #[+-|&^%]=\|//\==\|\*\*\==\|<<=\|>>=# contained nextgroup=@pyExpr skipwhite skipnl skipempty display
+syntax match pyAssign "[+-|&^%]=\|//\==\|\*\*\==\|<<=\|>>=" contained nextgroup=@pyExpr skipwhite skipnl skipempty display
 hi! link pyAssign Operator
 
 hi! link pyListBrace Typedef
@@ -622,18 +621,20 @@ function! <SID>AddModule(name, properties) " {{{
   if ! get(l:bufmodules, a:name, 0)
     let s:modules[bufnr('')][a:name] = 1
     " add a keyword for the module name itself
-    exe printf('syn keyword pyKnownIdentifier %s nextgroup=pyDot_%s,@pyClOperators,pyCompare,pyParamsRegion skipwhite', a:name, a:name)
+    " exe printf('syn keyword pyKnownIdentifier %s nextgroup=pyDot_%s,@pyClOperators,pyCompare,pyParamsRegion skipwhite', a:name, a:name)
+    exe printf('syn keyword pyKnownIdentifier %s nextgroup=pyDot,@pyClOperators,pyCompare,pyParamsRegion skipwhite', a:name)
     " add a dot match for that module
-    exe printf('syn match pyDot_%s contained /\./ nextgroup=pyInside_%s', a:name, a:name)
+    " exe printf('syn match pyDot_%s contained /\./ nextgroup=pyInside_%s', a:name, a:name)
     " link colours
-    exe printf('hi! link pyDot_%s pyDot', a:name)
-    exe printf('hi! link pyInside_%s pyKnownIdentifier', a:name)
+    " exe printf('hi! link pyDot_%s pyDot', a:name)
+    " exe printf('hi! link pyInside_%s pyKnownIdentifier', a:name)
   endif
 
   " add [more] properties of that module
   exe printf('syn keyword pyInside_%s contained %s nextgroup=@pyClOperators,pyCompare,pyParamsRegion skipwhite', a:name, a:properties)
 endfunction " }}}
 function! <SID>AddSubModule(owner, name, properties) " {{{
+  return
 	let l:inside = printf('pyInside_%s_%s', a:owner, a:name)
 	let l:dot = printf('pyDot_%s_%s', a:owner, a:name)
 	exe printf('syn keyword pyInside_%s contained %s nextgroup=%s,@pyClOperators,pyCompare,pyParamsRegion skipwhite', a:owner, a:name, l:dot)
@@ -642,8 +643,8 @@ function! <SID>AddSubModule(owner, name, properties) " {{{
 	" add properties of that module
 	exe printf('syn keyword %s contained %s nextgroup=@pyClOperators,pyCompare,pyParamsRegion skipwhite', l:inside, a:properties)
 	" link colours
-	exe printf('hi! link %s pyDot', l:dot)
-	exe printf('hi! link %s pyKnownIdentifier', l:inside)
+	" exe printf('hi! link %s pyDot', l:dot)
+	" exe printf('hi! link %s pyKnownIdentifier', l:inside)
 endfunction " }}}
 
 " sys
@@ -688,14 +689,14 @@ execute 'syn keyword pyKnownMethod contained' s:random_methods
 
 
 " os
-let s:os =  "name curdir pardir sep extsep altsep pathsep linesep defpath devnull unlink system"
-			\ . " environ chdir fchdir getcwd ctermid getegid geteuid getgid getgroups getlogin getpgid getpgrp"
-			\ . " getpid getppid getuid getenv putenv setegid seteuid setgid setgroups setpgid setreuid setregid setsid setuid"
-			\ . " strerror umask uname unsetenv"
+let s:os =  'name curdir pardir sep extsep altsep pathsep linesep defpath devnull unlink system'
+			\ . ' environ chdir fchdir getcwd ctermid getegid geteuid getgid getgroups getlogin getpgid getpgrp'
+			\ . ' getpid getppid getuid getenv putenv setegid seteuid setgid setgroups setpgid setreuid setregid setsid setuid'
+			\ . ' strerror umask uname unsetenv'
 call <SID>AddModule('os', s:os)
-let s:posixpath = "normcase isabs join splitdrive split splitext basename dirname commonprefix getsize getmtime getatime getctime"
-			\ . " islink exists lexists isdir isfile ismount walk expanduser expandvars normpath abspath samefile sameopenfile samestat"
-      \ . " curdir pardir sep pathsep defpath altsep extsep devnull realpath supports_unicode_filenames"
+let s:posixpath = 'normcase isabs join splitdrive split splitext basename dirname commonprefix getsize getmtime getatime getctime'
+			\ . ' islink exists lexists isdir isfile ismount walk expanduser expandvars normpath abspath samefile sameopenfile samestat'
+      \ . ' curdir pardir sep pathsep defpath altsep extsep devnull realpath supports_unicode_filenames'
 call <SID>AddSubModule('os', 'path', s:posixpath)
 
 call <SID>AddModule('getopt', 'getopt gnu_getopt')
@@ -710,8 +711,8 @@ call <SID>AddModule('array', 'array')
 call <SID>AddModule('atexit', 'register')
 
 " urllib, sgmllib
-call <SID>AddModule('urllib', "urlopen URLopener FancyURLopener urlretrieve urlcleanup quote quote_plus unquote unquote_plus urlencode url2pathname pathname2url splittag localhost thishost ftperrors basejoin unwrap splittype splithost splituser splitpasswd splitport splitnport splitquery splitattr splitvalue splitgophertype getproxies")
-call <SID>AddModule('sgmllib', "SGMLParser SGMLParseError")
+call <SID>AddModule('urllib', 'urlopen URLopener FancyURLopener urlretrieve urlcleanup quote quote_plus unquote unquote_plus urlencode url2pathname pathname2url splittag localhost thishost ftperrors basejoin unwrap splittype splithost splituser splitpasswd splitport splitnport splitquery splitattr splitvalue splitgophertype getproxies')
+call <SID>AddModule('sgmllib', 'SGMLParser SGMLParseError')
 
 " glob
 call <SID>AddModule('glob', 'glob iglob')
@@ -729,10 +730,10 @@ call <SID>AddModule('socket', 'socket socketpair fromfd gethostname gethostbynam
 call <SID>AddModule('shutil', 'copyfileobj copyfile copymode copystat copy copy2 ignore_patterns copytree rmtree move Error')
 
 " gc
-let s:gc = "enable disable isenabled collect set_debug get_debug get_objects set_threshold"
-			\ . " get_count get_threshold get_referrers get_referents garbage"
-			\ . " DEBUG_STATS DEBUG_COLLECTABLE DEBUG_UNCOLLECTABLE DEBUG_INSTANCES DEBUG_OBJECTS"
-			\ . " DEBUG_SAVEALL DEBUG_LEAK"
+let s:gc = 'enable disable isenabled collect set_debug get_debug get_objects set_threshold'
+			\ . ' get_count get_threshold get_referrers get_referents garbage'
+			\ . ' DEBUG_STATS DEBUG_COLLECTABLE DEBUG_UNCOLLECTABLE DEBUG_INSTANCES DEBUG_OBJECTS'
+			\ . ' DEBUG_SAVEALL DEBUG_LEAK'
 call <SID>AddModule('gc', s:gc)
 
 " weakref
@@ -1076,6 +1077,6 @@ hi! link pyComment Comment
 " }}}
 
 " prevents other syntax files from loading
-let b:current_syntax = "python"
+let b:current_syntax = 'python'
 
 " vim: foldmethod=marker
